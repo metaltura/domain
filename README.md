@@ -18,10 +18,10 @@ Un modèle qui instancie le domaine ou un patron qui le lit écrit dans sa liste
 
 ```yaml
 depends:
-  - metaltura/domain/Domain@v1.0.0
+  - metaltura/domain/Domain@v2.0.0
 ```
 
-Metaltura clone ce dépôt à l'étiquette `v1.0.0` à l'ouverture de l'espace de travail. Toute la librairie est à `v1.0.0` : Metaltura refuse qu'un même dépôt soit demandé à deux versions.
+Metaltura clone ce dépôt à l'étiquette `v2.0.0` à l'ouverture de l'espace de travail. Toute la librairie est à `v2.0.0` : Metaltura refuse qu'un même dépôt soit demandé à deux versions.
 
 ## D'où il vient
 
