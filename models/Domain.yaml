@@ -323,8 +323,8 @@ elements:
         icon: mui:ViewInAr
         color: '#1565c0'
         extends:
-          - Core:RootElement
           - Core:Type
+          - OldDomain:packaging.DomainRootElement
         properties:
           - name: extends
             instanceOf: Core:Relation
