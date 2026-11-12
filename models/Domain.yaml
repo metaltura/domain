@@ -1,291 +1,6 @@
 name: Domain
 instanceOf: Core:Model
 elements:
-  - name: Entity
-    instanceOf: Core:Class
-    icon: mui:ViewInAr
-    color: '#1565c0'
-    extends:
-      - Core:RootElement
-      - Core:Type
-    properties:
-      - name: extends
-        instanceOf: Core:Relation
-        to: Domain:Entity
-        supertype: true
-      - name: fields
-        instanceOf: Core:Relation
-        multiple: true
-        to: Domain:Field
-        composite: true
-        opposite: Domain:Field.entity
-      - name: relations
-        instanceOf: Core:Relation
-        multiple: true
-        to: Domain:EntityRelation
-        composite: true
-        opposite: Domain:EntityRelation.entity
-      - name: invariants
-        instanceOf: Core:Relation
-        multiple: true
-        to: Domain:Invariant
-        composite: true
-        opposite: Domain:Invariant.entity
-      - name: lifecycle
-        instanceOf: Core:Relation
-        to: Domain:Lifecycle
-        composite: true
-        opposite: Domain:Lifecycle.entity
-  - name: Field
-    instanceOf: Core:Class
-    icon: mui:ShortText
-    extends:
-      - Core:Feature
-    properties:
-      - name: entity
-        instanceOf: Core:Relation
-        mandatory: true
-        to: Domain:Entity
-        opposite: Domain:Entity.fields
-      - name: type
-        instanceOf: Core:Relation
-        mandatory: true
-        to: Core:Primitive
-  - name: EntityRelation
-    instanceOf: Core:Class
-    icon: mui:Shortcut
-    extends:
-      - Core:Feature
-    properties:
-      - name: entity
-        instanceOf: Core:Relation
-        mandatory: true
-        to: Domain:Entity
-        opposite: Domain:Entity.relations
-      - name: type
-        instanceOf: Core:Relation
-        mandatory: true
-        to: Domain:Entity
-      - name: composite
-        instanceOf: Core:PrimitiveProperty
-        type: Core:Boolean
-      - name: opposite
-        instanceOf: Core:Relation
-        to: Domain:EntityRelation
-  - name: Invariant
-    instanceOf: Core:Class
-    icon: mui:Rule
-    extends:
-      - Core:Element
-    properties:
-      - name: entity
-        instanceOf: Core:Relation
-        mandatory: true
-        to: Domain:Entity
-        opposite: Domain:Entity.invariants
-      - name: message
-        instanceOf: Core:PrimitiveProperty
-        type: Core:String
-      - name: check
-        instanceOf: Core:FunctionProperty
-        mandatory: true
-        input:
-          - name: entity
-            instanceOf: Core:InputFeature
-            mandatory: true
-            type: Core:Element
-        output:
-          name: result
-          instanceOf: Core:OutputFeature
-          type: Core:Boolean
-        perInstance: true
-  - name: Lifecycle
-    instanceOf: Core:Class
-    icon: mui:Loop
-    extends:
-      - Core:Element
-    properties:
-      - name: entity
-        instanceOf: Core:Relation
-        mandatory: true
-        to: Domain:Entity
-        opposite: Domain:Entity.lifecycle
-      - name: states
-        instanceOf: Core:Relation
-        multiple: true
-        to: Domain:State
-        composite: true
-        opposite: Domain:State.lifecycle
-      - name: transitions
-        instanceOf: Core:Relation
-        multiple: true
-        to: Domain:Transition
-        composite: true
-        opposite: Domain:Transition.lifecycle
-      - name: initialState
-        instanceOf: Core:Relation
-        mandatory: true
-        to: Domain:State
-        filter: |
-          export default function run(state: any, owner: any): boolean {
-            return !!state && state.lifecycle === owner
-          }
-  - name: State
-    instanceOf: Core:Class
-    icon: mui:RadioButtonChecked
-    extends:
-      - Core:Element
-    properties:
-      - name: lifecycle
-        instanceOf: Core:Relation
-        mandatory: true
-        to: Domain:Lifecycle
-        opposite: Domain:Lifecycle.states
-  - name: Transition
-    instanceOf: Core:Class
-    icon: mui:TrendingFlat
-    extends:
-      - Core:Element
-    properties:
-      - name: lifecycle
-        instanceOf: Core:Relation
-        mandatory: true
-        to: Domain:Lifecycle
-        opposite: Domain:Lifecycle.transitions
-      - name: source
-        instanceOf: Core:Relation
-        mandatory: true
-        to: Domain:State
-        filter: |
-          export default function run(state: any, owner: any): boolean {
-            return !!state && !!owner && state.lifecycle === owner.lifecycle
-          }
-      - name: target
-        instanceOf: Core:Relation
-        mandatory: true
-        to: Domain:State
-        filter: |
-          export default function run(state: any, owner: any): boolean {
-            return !!state && !!owner && state.lifecycle === owner.lifecycle
-          }
-      - name: guard
-        instanceOf: Core:FunctionProperty
-        input:
-          - name: entity
-            instanceOf: Core:InputFeature
-            mandatory: true
-            type: Core:Element
-        output:
-          name: result
-          instanceOf: Core:OutputFeature
-          type: Core:Boolean
-        perInstance: true
-  - name: Service
-    instanceOf: Core:Class
-    icon: mui:Build
-    color: '#2e7d32'
-    extends:
-      - Core:RootElement
-    properties:
-      - name: operations
-        instanceOf: Core:Relation
-        multiple: true
-        to: Domain:Operation
-        composite: true
-        opposite: Domain:Operation.service
-      - name: dependencies
-        instanceOf: Core:Relation
-        multiple: true
-        to: Domain:Service
-  - name: Operation
-    instanceOf: Core:Class
-    icon: mui:Code
-    extends:
-      - Core:Function
-    properties:
-      - name: service
-        instanceOf: Core:Relation
-        mandatory: true
-        to: Domain:Service
-        opposite: Domain:Service.operations
-  - name: Process
-    instanceOf: Core:Class
-    icon: mui:AccountTree
-    color: '#6a1b9a'
-    extends:
-      - Core:RootElement
-    properties:
-      - name: steps
-        instanceOf: Core:Relation
-        multiple: true
-        to: Domain:Step
-        composite: true
-        opposite: Domain:Step.process
-      - name: startStep
-        instanceOf: Core:Relation
-        mandatory: true
-        to: Domain:Step
-        filter: |
-          export default function run(step: any, owner: any): boolean {
-            return !!step && step.process === owner
-          }
-  - name: Step
-    instanceOf: Core:Class
-    icon: mui:PlayArrow
-    extends:
-      - Core:Element
-    properties:
-      - name: process
-        instanceOf: Core:Relation
-        mandatory: true
-        to: Domain:Process
-        opposite: Domain:Process.steps
-      - name: service
-        instanceOf: Core:Relation
-        mandatory: true
-        to: Domain:Service
-      - name: operation
-        instanceOf: Core:Relation
-        mandatory: true
-        to: Domain:Operation
-        filter: |
-          export default function run(operation: any, owner: any): boolean {
-            if (!operation || !owner) return false
-            if (!owner.service) return true
-            return operation.service === owner.service
-          }
-      - name: branches
-        instanceOf: Core:Relation
-        multiple: true
-        to: Domain:Branch
-        composite: true
-        opposite: Domain:Branch.step
-  - name: Branch
-    instanceOf: Core:Class
-    icon: mui:CallSplit
-    extends:
-      - Core:Element
-    properties:
-      - name: step
-        instanceOf: Core:Relation
-        mandatory: true
-        to: Domain:Step
-        opposite: Domain:Step.branches
-      - name: target
-        instanceOf: Core:Relation
-        mandatory: true
-        to: Domain:Step
-        filter: |
-          export default function run(step: any, owner: any): boolean {
-            return !!step && !!owner && !!owner.step && step.process === owner.step.process
-          }
-      - name: condition
-        instanceOf: Core:FunctionProperty
-        output:
-          name: result
-          instanceOf: Core:OutputFeature
-          type: Core:Boolean
-        perInstance: true
   - name: DomainClassDiagram
     instanceOf: Diagram:core.Diagram
     type: Uml:ClassDiagram
@@ -293,84 +8,84 @@ elements:
     nodes:
       - name: Entity
         instanceOf: Diagram:core.Node
-        element: Domain:Entity
+        element: Domain:entities.Entity
         x: -395
         'y': 40
         width: 210
         height: 120
       - name: Field
         instanceOf: Diagram:core.Node
-        element: Domain:Field
+        element: Domain:entities.Field
         x: -825
         'y': 270
         width: 200
         height: 104
       - name: EntityRelation
         instanceOf: Diagram:core.Node
-        element: Domain:EntityRelation
+        element: Domain:entities.EntityRelation
         x: -535
         'y': 270
         width: 200
         height: 120
       - name: Invariant
         instanceOf: Diagram:core.Node
-        element: Domain:Invariant
+        element: Domain:entities.Invariant
         x: -245
         'y': 270
         width: 200
         height: 88
       - name: Lifecycle
         instanceOf: Diagram:core.Node
-        element: Domain:Lifecycle
+        element: Domain:lifecycles.Lifecycle
         x: 45
         'y': 270
         width: 200
         height: 104
       - name: State
         instanceOf: Diagram:core.Node
-        element: Domain:State
+        element: Domain:lifecycles.State
         x: -390
         'y': 500
         width: 200
         height: 60
       - name: Transition
         instanceOf: Diagram:core.Node
-        element: Domain:Transition
+        element: Domain:lifecycles.Transition
         x: -100
         'y': 500
         width: 200
         height: 104
       - name: Service
         instanceOf: Diagram:core.Node
-        element: Domain:Service
+        element: Domain:services.Service
         x: -95
         'y': 40
         width: 200
         height: 72
       - name: Operation
         instanceOf: Diagram:core.Node
-        element: Domain:Operation
+        element: Domain:services.Operation
         x: 335
         'y': 270
         width: 200
         height: 60
       - name: Process
         instanceOf: Diagram:core.Node
-        element: Domain:Process
+        element: Domain:processes.Process
         x: 195
         'y': 40
         width: 200
         height: 72
       - name: Step
         instanceOf: Diagram:core.Node
-        element: Domain:Step
+        element: Domain:processes.Step
         x: 625
         'y': 270
         width: 200
         height: 104
       - name: Branch
         instanceOf: Diagram:core.Node
-        element: Domain:Branch
+        element: Domain:processes.Branch
         x: 190
         'y': 500
         width: 200
@@ -379,7 +94,7 @@ elements:
       - name: EntityExtendsLink
         instanceOf: Diagram:core.Link
         mapping: Uml:ClassDiagram.relation
-        element: Domain:Entity.extends
+        element: Domain:entities.Entity.extends
         points:
           - -125
           - 55
@@ -390,31 +105,31 @@ elements:
       - name: EntityFieldsLink
         instanceOf: Diagram:core.Link
         mapping: Uml:ClassDiagram.relation
-        element: Domain:Entity.fields
+        element: Domain:entities.Entity.fields
         labelX: 0.7
         labelY: -10
       - name: EntityRelationsLink
         instanceOf: Diagram:core.Link
         mapping: Uml:ClassDiagram.relation
-        element: Domain:Entity.relations
+        element: Domain:entities.Entity.relations
         labelX: 0.7
         labelY: -10
       - name: EntityInvariantsLink
         instanceOf: Diagram:core.Link
         mapping: Uml:ClassDiagram.relation
-        element: Domain:Entity.invariants
+        element: Domain:entities.Entity.invariants
         labelX: 0.7
         labelY: -10
       - name: EntityLifecycleLink
         instanceOf: Diagram:core.Link
         mapping: Uml:ClassDiagram.relation
-        element: Domain:Entity.lifecycle
+        element: Domain:entities.Entity.lifecycle
         labelX: 0.7
         labelY: -10
       - name: EntityRelationTargetLink
         instanceOf: Diagram:core.Link
         mapping: Uml:ClassDiagram.relation
-        element: Domain:EntityRelation.type
+        element: Domain:entities.EntityRelation.type
         points:
           - -292
           - 215
@@ -423,19 +138,19 @@ elements:
       - name: LifecycleStatesLink
         instanceOf: Diagram:core.Link
         mapping: Uml:ClassDiagram.relation
-        element: Domain:Lifecycle.states
+        element: Domain:lifecycles.Lifecycle.states
         labelX: 0.7
         labelY: -10
       - name: LifecycleTransitionsLink
         instanceOf: Diagram:core.Link
         mapping: Uml:ClassDiagram.relation
-        element: Domain:Lifecycle.transitions
+        element: Domain:lifecycles.Lifecycle.transitions
         labelX: 0.7
         labelY: -10
       - name: LifecycleInitialStateLink
         instanceOf: Diagram:core.Link
         mapping: Uml:ClassDiagram.relation
-        element: Domain:Lifecycle.initialState
+        element: Domain:lifecycles.Lifecycle.initialState
         points:
           - -2
           - 426
@@ -444,13 +159,13 @@ elements:
       - name: TransitionSourceLink
         instanceOf: Diagram:core.Link
         mapping: Uml:ClassDiagram.relation
-        element: Domain:Transition.source
+        element: Domain:lifecycles.Transition.source
         labelX: 0.7
         labelY: -10
       - name: TransitionTargetLink
         instanceOf: Diagram:core.Link
         mapping: Uml:ClassDiagram.relation
-        element: Domain:Transition.target
+        element: Domain:lifecycles.Transition.target
         points:
           - -75
           - 541
@@ -459,13 +174,13 @@ elements:
       - name: ServiceOperationsLink
         instanceOf: Diagram:core.Link
         mapping: Uml:ClassDiagram.relation
-        element: Domain:Service.operations
+        element: Domain:services.Service.operations
         labelX: 0.7
         labelY: -10
       - name: ServiceDependenciesLink
         instanceOf: Diagram:core.Link
         mapping: Uml:ClassDiagram.relation
-        element: Domain:Service.dependencies
+        element: Domain:services.Service.dependencies
         points:
           - 165
           - 55
@@ -476,13 +191,13 @@ elements:
       - name: ProcessStepsLink
         instanceOf: Diagram:core.Link
         mapping: Uml:ClassDiagram.relation
-        element: Domain:Process.steps
+        element: Domain:processes.Process.steps
         labelX: 0.7
         labelY: -10
       - name: ProcessStartStepLink
         instanceOf: Diagram:core.Link
         mapping: Uml:ClassDiagram.relation
-        element: Domain:Process.startStep
+        element: Domain:processes.Process.startStep
         points:
           - 580
           - 199
@@ -491,25 +206,25 @@ elements:
       - name: StepServiceLink
         instanceOf: Diagram:core.Link
         mapping: Uml:ClassDiagram.relation
-        element: Domain:Step.service
+        element: Domain:processes.Step.service
         labelX: 0.7
         labelY: -10
       - name: StepOperationLink
         instanceOf: Diagram:core.Link
         mapping: Uml:ClassDiagram.relation
-        element: Domain:Step.operation
+        element: Domain:processes.Step.operation
         labelX: 0.7
         labelY: -10
       - name: StepBranchesLink
         instanceOf: Diagram:core.Link
         mapping: Uml:ClassDiagram.relation
-        element: Domain:Step.branches
+        element: Domain:processes.Step.branches
         labelX: 0.7
         labelY: -10
       - name: BranchTargetLink
         instanceOf: Diagram:core.Link
         mapping: Uml:ClassDiagram.relation
-        element: Domain:Branch.target
+        element: Domain:processes.Branch.target
         points:
           - 577
           - 433
@@ -518,48 +233,385 @@ elements:
       - name: entityLink
         instanceOf: Diagram:core.Link
         mapping: Uml:ClassDiagram.relation
-        element: Domain:Field.entity
+        element: Domain:entities.Field.entity
         hidden: true
       - name: entityLink2
         instanceOf: Diagram:core.Link
         mapping: Uml:ClassDiagram.relation
-        element: Domain:EntityRelation.entity
+        element: Domain:entities.EntityRelation.entity
         hidden: true
       - name: entityLink3
         instanceOf: Diagram:core.Link
         mapping: Uml:ClassDiagram.relation
-        element: Domain:Invariant.entity
+        element: Domain:entities.Invariant.entity
         hidden: true
       - name: entityLink4
         instanceOf: Diagram:core.Link
         mapping: Uml:ClassDiagram.relation
-        element: Domain:Lifecycle.entity
+        element: Domain:lifecycles.Lifecycle.entity
         hidden: true
       - name: lifecycleLink
         instanceOf: Diagram:core.Link
         mapping: Uml:ClassDiagram.relation
-        element: Domain:State.lifecycle
+        element: Domain:lifecycles.State.lifecycle
         hidden: true
       - name: lifecycleLink2
         instanceOf: Diagram:core.Link
         mapping: Uml:ClassDiagram.relation
-        element: Domain:Transition.lifecycle
+        element: Domain:lifecycles.Transition.lifecycle
         hidden: true
       - name: serviceLink
         instanceOf: Diagram:core.Link
         mapping: Uml:ClassDiagram.relation
-        element: Domain:Operation.service
+        element: Domain:services.Operation.service
         hidden: true
       - name: processLink
         instanceOf: Diagram:core.Link
         mapping: Uml:ClassDiagram.relation
-        element: Domain:Step.process
+        element: Domain:processes.Step.process
         hidden: true
       - name: stepLink
         instanceOf: Diagram:core.Link
         mapping: Uml:ClassDiagram.relation
-        element: Domain:Branch.step
+        element: Domain:processes.Branch.step
         hidden: true
+  - name: Domain
+    instanceOf: Core:Class
+    icon: mui:House
+    color: '#4996df'
+    extends:
+      - Domain:packaging.DomainRootElement
+    properties:
+      - name: elements
+        instanceOf: Core:Relation
+        multiple: true
+        to: Domain:packaging.DomainElement
+        composite: true
+        opposite: Diagram:core.Node.container
+  - name: packaging
+    instanceOf: Core:Package
+    elements:
+      - name: DomainElement
+        instanceOf: Core:Class
+        abstract: true
+        color: '#4996df'
+        extends:
+          - Core:Element
+      - name: DomainRootElement
+        instanceOf: Core:Class
+        abstract: true
+        extends:
+          - Domain:packaging.DomainElement
+          - Core:RootElement
+      - name: DomainPackage
+        instanceOf: Core:Class
+        extends:
+          - Core:Package
+          - Domain:packaging.DomainRootElement
+        properties:
+          - name: elements
+            instanceOf: Core:Relation
+            multiple: true
+            to: Domain:packaging.DomainRootElement
+            composite: true
+            opposite: Core:RootElement.container
+  - name: entities
+    instanceOf: Core:Package
+    elements:
+      - name: Entity
+        instanceOf: Core:Class
+        icon: mui:ViewInAr
+        color: '#1565c0'
+        extends:
+          - Core:RootElement
+          - Core:Type
+        properties:
+          - name: extends
+            instanceOf: Core:Relation
+            to: Domain:entities.Entity
+            supertype: true
+          - name: fields
+            instanceOf: Core:Relation
+            multiple: true
+            to: Domain:entities.Field
+            composite: true
+            opposite: Domain:entities.Field.entity
+          - name: relations
+            instanceOf: Core:Relation
+            multiple: true
+            to: Domain:entities.EntityRelation
+            composite: true
+            opposite: Domain:entities.EntityRelation.entity
+          - name: invariants
+            instanceOf: Core:Relation
+            multiple: true
+            to: Domain:entities.Invariant
+            composite: true
+            opposite: Domain:entities.Invariant.entity
+          - name: lifecycle
+            instanceOf: Core:Relation
+            to: Domain:lifecycles.Lifecycle
+            composite: true
+            opposite: Domain:lifecycles.Lifecycle.entity
+      - name: Field
+        instanceOf: Core:Class
+        icon: mui:ShortText
+        extends:
+          - Core:Feature
+        properties:
+          - name: entity
+            instanceOf: Core:Relation
+            mandatory: true
+            to: Domain:entities.Entity
+            opposite: Domain:entities.Entity.fields
+          - name: type
+            instanceOf: Core:Relation
+            mandatory: true
+            to: Core:Primitive
+      - name: EntityRelation
+        instanceOf: Core:Class
+        icon: mui:Shortcut
+        extends:
+          - Core:Feature
+        properties:
+          - name: entity
+            instanceOf: Core:Relation
+            mandatory: true
+            to: Domain:entities.Entity
+            opposite: Domain:entities.Entity.relations
+          - name: type
+            instanceOf: Core:Relation
+            mandatory: true
+            to: Domain:entities.Entity
+          - name: composite
+            instanceOf: Core:PrimitiveProperty
+            type: Core:Boolean
+          - name: opposite
+            instanceOf: Core:Relation
+            to: Domain:entities.EntityRelation
+      - name: Invariant
+        instanceOf: Core:Class
+        icon: mui:Rule
+        extends:
+          - Core:Element
+        properties:
+          - name: entity
+            instanceOf: Core:Relation
+            mandatory: true
+            to: Domain:entities.Entity
+            opposite: Domain:entities.Entity.invariants
+          - name: message
+            instanceOf: Core:PrimitiveProperty
+            type: Core:String
+          - name: check
+            instanceOf: Core:FunctionProperty
+            mandatory: true
+            input:
+              - name: entity
+                instanceOf: Core:InputFeature
+                mandatory: true
+                type: Core:Element
+            output:
+              name: result
+              instanceOf: Core:OutputFeature
+              type: Core:Boolean
+            perInstance: true
+  - name: lifecycles
+    instanceOf: Core:Package
+    elements:
+      - name: Lifecycle
+        instanceOf: Core:Class
+        icon: mui:Loop
+        extends:
+          - Core:Element
+        properties:
+          - name: entity
+            instanceOf: Core:Relation
+            mandatory: true
+            to: Domain:entities.Entity
+            opposite: Domain:entities.Entity.lifecycle
+          - name: states
+            instanceOf: Core:Relation
+            multiple: true
+            to: Domain:lifecycles.State
+            composite: true
+            opposite: Domain:lifecycles.State.lifecycle
+          - name: transitions
+            instanceOf: Core:Relation
+            multiple: true
+            to: Domain:lifecycles.Transition
+            composite: true
+            opposite: Domain:lifecycles.Transition.lifecycle
+          - name: initialState
+            instanceOf: Core:Relation
+            mandatory: true
+            to: Domain:lifecycles.State
+            filter: |
+              export default function run(state: any, owner: any): boolean {
+                return !!state && state.lifecycle === owner
+              }
+      - name: State
+        instanceOf: Core:Class
+        icon: mui:RadioButtonChecked
+        extends:
+          - Core:Element
+        properties:
+          - name: lifecycle
+            instanceOf: Core:Relation
+            mandatory: true
+            to: Domain:lifecycles.Lifecycle
+            opposite: Domain:lifecycles.Lifecycle.states
+      - name: Transition
+        instanceOf: Core:Class
+        icon: mui:TrendingFlat
+        extends:
+          - Core:Element
+        properties:
+          - name: lifecycle
+            instanceOf: Core:Relation
+            mandatory: true
+            to: Domain:lifecycles.Lifecycle
+            opposite: Domain:lifecycles.Lifecycle.transitions
+          - name: source
+            instanceOf: Core:Relation
+            mandatory: true
+            to: Domain:lifecycles.State
+            filter: |
+              export default function run(state: any, owner: any): boolean {
+                return !!state && !!owner && state.lifecycle === owner.lifecycle
+              }
+          - name: target
+            instanceOf: Core:Relation
+            mandatory: true
+            to: Domain:lifecycles.State
+            filter: |
+              export default function run(state: any, owner: any): boolean {
+                return !!state && !!owner && state.lifecycle === owner.lifecycle
+              }
+          - name: guard
+            instanceOf: Core:FunctionProperty
+            input:
+              - name: entity
+                instanceOf: Core:InputFeature
+                mandatory: true
+                type: Core:Element
+            output:
+              name: result
+              instanceOf: Core:OutputFeature
+              type: Core:Boolean
+            perInstance: true
+  - name: services
+    instanceOf: Core:Package
+    elements:
+      - name: Service
+        instanceOf: Core:Class
+        icon: mui:Build
+        color: '#2e7d32'
+        extends:
+          - Core:RootElement
+        properties:
+          - name: operations
+            instanceOf: Core:Relation
+            multiple: true
+            to: Domain:services.Operation
+            composite: true
+            opposite: Domain:services.Operation.service
+          - name: dependencies
+            instanceOf: Core:Relation
+            multiple: true
+            to: Domain:services.Service
+      - name: Operation
+        instanceOf: Core:Class
+        icon: mui:Code
+        extends:
+          - Core:Function
+        properties:
+          - name: service
+            instanceOf: Core:Relation
+            mandatory: true
+            to: Domain:services.Service
+            opposite: Domain:services.Service.operations
+  - name: processes
+    instanceOf: Core:Package
+    elements:
+      - name: Process
+        instanceOf: Core:Class
+        icon: mui:AccountTree
+        color: '#6a1b9a'
+        extends:
+          - Core:RootElement
+        properties:
+          - name: steps
+            instanceOf: Core:Relation
+            multiple: true
+            to: Domain:processes.Step
+            composite: true
+            opposite: Domain:processes.Step.process
+          - name: startStep
+            instanceOf: Core:Relation
+            mandatory: true
+            to: Domain:processes.Step
+            filter: |
+              export default function run(step: any, owner: any): boolean {
+                return !!step && step.process === owner
+              }
+      - name: Step
+        instanceOf: Core:Class
+        icon: mui:PlayArrow
+        extends:
+          - Core:Element
+        properties:
+          - name: process
+            instanceOf: Core:Relation
+            mandatory: true
+            to: Domain:processes.Process
+            opposite: Domain:processes.Process.steps
+          - name: service
+            instanceOf: Core:Relation
+            mandatory: true
+            to: Domain:services.Service
+          - name: operation
+            instanceOf: Core:Relation
+            mandatory: true
+            to: Domain:services.Operation
+            filter: |
+              export default function run(operation: any, owner: any): boolean {
+                if (!operation || !owner) return false
+                if (!owner.service) return true
+                return operation.service === owner.service
+              }
+          - name: branches
+            instanceOf: Core:Relation
+            multiple: true
+            to: Domain:processes.Branch
+            composite: true
+            opposite: Domain:processes.Branch.step
+      - name: Branch
+        instanceOf: Core:Class
+        icon: mui:CallSplit
+        extends:
+          - Core:Element
+        properties:
+          - name: step
+            instanceOf: Core:Relation
+            mandatory: true
+            to: Domain:processes.Step
+            opposite: Domain:processes.Step.branches
+          - name: target
+            instanceOf: Core:Relation
+            mandatory: true
+            to: Domain:processes.Step
+            filter: |
+              export default function run(step: any, owner: any): boolean {
+                return !!step && !!owner && !!owner.step && step.process === owner.step.process
+              }
+          - name: condition
+            instanceOf: Core:FunctionProperty
+            output:
+              name: result
+              instanceOf: Core:OutputFeature
+              type: Core:Boolean
+            perInstance: true
 version: latest
 depends:
   - Diagram
