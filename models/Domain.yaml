@@ -324,7 +324,7 @@ elements:
         color: '#1565c0'
         extends:
           - Core:Type
-          - OldDomain:packaging.DomainRootElement
+          - Domain:packaging.DomainRootElement
         properties:
           - name: extends
             instanceOf: Core:Relation
